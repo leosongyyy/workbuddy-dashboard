@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>远的AI学习圈 · 工作日志仪表盘 v3</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0d1117;
+  --card: #161b22;
+  --card-hover: #1c2128;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --green-0: #161b22;
+  --green-1: #0e4429;
+  --green-2: #006d32;
+  --green-3: #26a641;
+  --green-4: #39d353;
+  --purple: #a371f7;
+  --orange: #f0883e;
+  --blue: #58a6ff;
+  --red: #f85149;
+  --yellow: #e3b341;
+  --pink: #db61a2;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.container { max-width: 1400px; margin: 0 auto; }
+
+/* HEADER */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.header-left h1 { font-size: 20px; font-weight: 600; color: var(--text); }
+.header-left .subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.header-right { text-align: right; }
+.header-right .stat-row { display: flex; gap: 16px; justify-content: flex-end; margin-top: 4px; }
+.header-right .stat-val { color: var(--text); font-weight: 700; }
+.header-right .stat { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted); }
+
+/* MODULE SECTIONS */
+.modules-area {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.module-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  display: block;
+}
+.module-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.module-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.module-section-title .icon { font-size: 15px; }
+.module-section-title .count {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  background: var(--card-hover);
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+
+/* KPI CARDS */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  text-align: center;
+}
+.kpi-value { font-size: 22px; font-weight: 700; }
+.kpi-value.blue { color: var(--blue); }
+.kpi-value.green { color: #3fb950; }
+.kpi-value.orange { color: var(--orange); }
+.kpi-label { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+
+/* SKILL STATS */
+.skill-item { margin-bottom: 10px; }
+.skill-info { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+.skill-name { color: var(--text); }
+.skill-count { color: var(--text-muted); }
+.skill-bar-bg { background: var(--card-hover); border-radius: 4px; height: 8px; }
+.skill-bar-fill { background: var(--blue); height: 100%; border-radius: 4px; transition: width 0.3s; }
+
+/* HOUR CHART */
+.hour-chart { display: flex; align-items: flex-end; gap: 4px; height: 80px; margin: 12px 0 8px; }
+.hour-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.hour-bar {
+  width: 100%;
+  background: var(--blue);
+  border-radius: 2px 2px 0 0;
+  min-height: 2px;
+  transition: height 0.4s;
+  cursor: pointer;
+  opacity: 0.8;
+}
+.hour-bar:hover { opacity: 1; }
+.hour-bar-wrap:hover .hour-bar { background: var(--purple); }
+.hour-bar-label { font-size: 9px; color: var(--text-muted); }
+.hour-bar:hover { opacity: 1; }
+.time-peaks { text-align: center; }
+.time-peaks span { font-size: 12px; color: var(--text-muted); }
+.time-peaks strong { color: var(--orange); }
+
+/* TAG CLOUD */
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-item {
+  padding: 4px 12px;
+  border-radius: 16px;
+  cursor: default;
+  display: inline-block;
+}
+
+/* STREAK */
+.streak-display { display: flex; align-items: center; gap: 20px; }
+.streak-big { font-size: 40px; font-weight: 700; color: var(--green-4); line-height: 1; }
+.streak-big-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+.streak-meta { font-size: 12px; color: var(--text-muted); line-height: 1.8; }
+.streak-meta strong { color: var(--text); }
+.streak-calendar { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 12px; }
+.streak-day { width: 10px; height: 10px; border-radius: 2px; }
+.streak-day.on { background: var(--green-4); }
+.streak-day.off { background: var(--card-hover); border: 1px solid var(--border); }
+
+/* WEEK TREND */
+.week-chart { height: 80px; display: flex; align-items: flex-end; gap: 16px; justify-content: space-around; }
+.week-bar {
+  width: 40px;
+  background: var(--purple);
+  border-radius: 4px 4px 0 0;
+  min-height: 5px;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+.week-bar:hover { opacity: 1; }
+.week-labels { display: flex; justify-content: space-around; font-size: 11px; color: var(--text-muted); margin-top: 8px; }
+.week-stats { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+.week-stat { font-size: 12px; color: var(--text-muted); }
+.week-stat strong { color: var(--text); }
+.week-stat.up { color: #3fb950; }
+.week-stat.down { color: var(--red); }
+
+/* HEATMAP - GitHub Style */
+.calendar-section { margin-bottom: 28px; }
+.section-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.calendar-wrapper {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  overflow-x: auto;
+}
+.month-labels { display: flex; padding-left: 36px; margin-bottom: 4px; }
+.month-label { font-size: 11px; color: var(--text-muted); text-align: left; }
+.calendar-body { display: flex; gap: 4px; }
+.day-labels { display: grid; grid-template-rows: repeat(7, 13px); gap: 3px; margin-right: 4px; align-items: end; }
+.day-label { font-size: 10px; color: var(--text-muted); height: 13px; line-height: 13px; text-align: right; width: 28px; }
+.day-label:nth-child(1) { grid-row: 1; }  /* 周一 */
+.day-label:nth-child(2) { grid-row: 3; }  /* 周三 */
+.day-label:nth-child(3) { grid-row: 5; }  /* 周五 */
+.day-label:nth-child(4) { grid-row: 7; }  /* 周日 */
+.calendar-grid { display: grid; grid-template-rows: repeat(7, 13px); grid-auto-flow: column; grid-auto-columns: 13px; gap: 3px; }
+.day-cell {
+  width: 13px;
+  height: 13px;
+  border-radius: 2px;
+  background: var(--green-0);
+  cursor: pointer;
+  transition: transform 0.1s;
+  position: relative;
+}
+.day-cell:hover { transform: scale(1.3); z-index: 10; }
+.day-cell[data-level="1"] { background: var(--green-1); }
+.day-cell[data-level="2"] { background: var(--green-2); }
+.day-cell[data-level="3"] { background: var(--green-3); }
+.day-cell[data-level="4"] { background: var(--green-4); }
+.day-cell.empty { cursor: default; }
+.day-cell.empty:hover { transform: none; }
+.day-cell.today { outline: 2px solid var(--purple); outline-offset: 1px; }
+.day-cell .tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2d333b;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
+  color: var(--text);
+}
+.day-cell:hover .tooltip { display: block; }
+.calendar-legend { display: flex; align-items: center; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+.legend-cell { width: 13px; height: 13px; border-radius: 2px; }
+.calendar-legend span { font-size: 11px; color: var(--text-muted); }
+
+/* ALL TASKS */
+.all-tasks-section { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.section-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.section-header h2 { font-size: 14px; font-weight: 600; }
+.filter-tabs { display: flex; gap: 4px; }
+.filter-tab {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.filter-tab:hover { color: var(--text); background: var(--card-hover); }
+.filter-tab.active { color: var(--text); background: #1f6feb33; border-color: #1f6feb55; }
+.tasks-list { max-height: 480px; overflow-y: auto; }
+.tasks-list::-webkit-scrollbar { width: 4px; }
+.tasks-list::-webkit-scrollbar-track { background: transparent; }
+.tasks-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.task-item:last-child { border-bottom: none; }
+.task-item:hover { background: var(--card-hover); }
+.task-item.active { background: #1f6feb22; }
+.task-date { font-size: 11px; color: var(--text-muted); min-width: 60px; }
+.task-badge { font-size: 10px; padding: 2px 7px; border-radius: 12px; font-weight: 500; flex-shrink: 0; }
+.badge-article { background: #1a7f3711; color: #3fb950; border: 1px solid #1a7f3744; }
+.badge-skill { background: #8957e511; color: #a371f7; border: 1px solid #8957e544; }
+.badge-system { background: #f0883e11; color: var(--orange); border: 1px solid #f0883e44; }
+.badge-scraper { background: #58a6ff11; color: var(--blue); border: 1px solid #58a6ff44; }
+.badge-image { background: #e3b34111; color: var(--yellow); border: 1px solid #e3b34144; }
+.badge-course { background: #f8514911; color: var(--red); border: 1px solid #f8514944; }
+.badge-research { background: #388bfd22; color: var(--blue); border: 1px solid #388bfd44; }
+.task-title { font-size: 13px; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.task-count { font-size: 11px; color: var(--text-muted); background: var(--card-hover); padding: 1px 6px; border-radius: 10px; }
+.empty-state { padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 13px; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .modules-area { grid-template-columns: 1fr; }
+  header { flex-direction: column; gap: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">
+      <h1>远的AI学习圈 · 工作日志仪表盘</h1>
+      <div class="subtitle">自动生成 · 数据来源: memory 日志</div>
+    </div>
+    <div class="header-right">
+      <div class="stat-row">
+        <div class="stat"><span class="stat-val">32</span> 活跃天</div>
+        <div class="stat"><span class="stat-val">98</span> 总任务</div>
+        <div class="stat"><span class="stat-val">46</span> 文章</div>
+      </div>
+      <div class="subtitle" style="margin-top: 4px;">更新时间: 2026-04-23</div>
+    </div>
+  </header>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-value blue">98</div>
+      <div class="kpi-label">总任务数</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value green">46</div>
+      <div class="kpi-label">文章产出</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value">32</div>
+      <div class="kpi-label">活跃天数</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-value orange">7</div>
+      <div class="kpi-label">技能使用</div>
+    </div>
+  </div>
+
+  <!-- MODULE SECTIONS -->
+  <div class="modules-area">
+
+    <!-- 技能统计 -->
+    <div class="module-section">
+      <div class="module-section-header">
+        <div class="module-section-title">
+          <span class="icon">&#x1F4DA;</span>
+          技能使用统计
+          <span class="count">Top 5</span>
+        </div>
+      </div>
+      
+      
+      <div class="empty-state">暂无技能使用记录</div>
+      
+    </div>
+
+    <!-- 时间分布 -->
+    <div class="module-section">
+      <div class="module-section-header">
+        <div class="module-section-title">
+          <span class="icon">&#x23F0;</span>
+          一天中的效率分布
+          <span class="count">24小时</span>
+        </div>
+      </div>
+      <div class="hour-chart">
+        
+      </div>
+      <div class="time-peaks">
+        
+      </div>
+    </div>
+
+    <!-- 主题标签云 -->
+    <div class="module-section">
+      <div class="module-section-header">
+        <div class="module-section-title">
+          <span class="icon">&#x1F3F7;</span>
+          主题标签云
+          <span class="count">精力分配</span>
+        </div>
+      </div>
+      <div class="tag-cloud">
+        
+      </div>
+      
+      <div class="empty-state">暂无标签数据</div>
+      
+    </div>
+
+    <!-- 连续工作 Streak -->
+    <div class="module-section">
+      <div class="module-section-header">
+        <div class="module-section-title">
+          <span class="icon">&#x1F525;</span>
+          连续工作 Streak
+          <span class="count">激励模式</span>
+        </div>
+      </div>
+      <div class="streak-display">
+        <div>
+          <div class="streak-big">29</div>
+          <div class="streak-big-label">连续活跃天数</div>
+        </div>
+        <div class="streak-meta">
+          最长连续：<strong>29天</strong><br>
+          本轮开始：<strong>04-06</strong><br>
+          21/23天
+        </div>
+      </div>
+      
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">最近1个月活跃状态</div>
+      <div class="streak-calendar">
+        
+        <div class="streak-day off" title="03-25" style="background:var(--card-hover);border:1px solid var(--border)"></div>
+        
+        <div class="streak-day off" title="03-26" style="background:var(--card-hover);border:1px solid var(--border)"></div>
+        
+        <div class="streak-day off" title="03-27" style="background:var(--card-hover);border:1px solid var(--border)"></div>
+        
+        <div class="streak-day off" title="03-28" style="background:var(--card-hover);border:1px solid var(--border)"></div>
+        
+        <div class="streak-day off" title="03-29" style="background:var(--card-hover);border:1px solid var(--border)"></div>
+        
+        <div class="streak-day off" title="03-30" style="background:var(--card-hover);border:1px solid var(--border)"></div>
+        
+        <div class="streak-day off" title="03-31" style="background:var(--card-hover);border:1px solid var(--border)"></div>
+        
+        <div class="streak-day off" title="04-01" style="background:var(--card-hover);border:1px solid var(--border)"></div>
+        
+        <div class="streak-day on" title="04-02" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-03" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-04" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day off" title="04-05" style="background:var(--card-hover);border:1px solid var(--border)"></div>
+        
+        <div class="streak-day on" title="04-06" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-07" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-08" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-09" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-10" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-11" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-12" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-13" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-14" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-15" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-16" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-17" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-18" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-19" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-20" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-21" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day on" title="04-22" style="background:#238636;border:1px solid #2ea043"></div>
+        
+        <div class="streak-day off" title="04-23" style="background:var(--card-hover);border:1px solid var(--border)"></div>
+        
+      </div>
+    </div>
+
+    <!-- 周环比趋势 -->
+    <div class="module-section">
+      <div class="module-section-header">
+        <div class="module-section-title">
+          <span class="icon">&#x1F4C8;</span>
+          周环比趋势
+          <span class="count">Week over Week</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:2px;align-items:flex-end;height:80px;margin:8px 0;">
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#30363d;border-radius:1px;height:10px" title="03-15:2"></div>
+          <div style="font-size:8px;color:var(--text-muted);">15</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#30363d;border-radius:1px;height:10px" title="03-17:2"></div>
+          <div style="font-size:8px;color:var(--text-muted);">17</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#30363d;border-radius:1px;height:20px" title="03-19:4"></div>
+          <div style="font-size:8px;color:var(--text-muted);">19</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#30363d;border-radius:1px;height:5px" title="03-23:1"></div>
+          <div style="font-size:8px;color:var(--text-muted);">23</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#30363d;border-radius:1px;height:10px" title="03-25:2"></div>
+          <div style="font-size:8px;color:var(--text-muted);">25</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#388bfd;border-radius:1px;height:25px" title="03-29:5"></div>
+          <div style="font-size:8px;color:var(--text-muted);">29</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#388bfd;border-radius:1px;height:15px" title="03-30:3"></div>
+          <div style="font-size:8px;color:var(--text-muted);">30</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#388bfd;border-radius:1px;height:20px" title="03-31:4"></div>
+          <div style="font-size:8px;color:var(--text-muted);">31</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#388bfd;border-radius:1px;height:20px" title="04-02:4"></div>
+          <div style="font-size:8px;color:var(--text-muted);">02</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#388bfd;border-radius:1px;height:20px" title="04-03:4"></div>
+          <div style="font-size:8px;color:var(--text-muted);">03</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#388bfd;border-radius:1px;height:10px" title="04-04:2"></div>
+          <div style="font-size:8px;color:var(--text-muted);">04</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#39d353;border-radius:1px;height:10px" title="04-06:2"></div>
+          <div style="font-size:8px;color:var(--text-muted);">06</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#39d353;border-radius:1px;height:20px" title="04-07:4"></div>
+          <div style="font-size:8px;color:var(--text-muted);">07</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#39d353;border-radius:1px;height:10px" title="04-08:2"></div>
+          <div style="font-size:8px;color:var(--text-muted);">08</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#39d353;border-radius:1px;height:30px" title="04-09:6"></div>
+          <div style="font-size:8px;color:var(--text-muted);">09</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#39d353;border-radius:1px;height:20px" title="04-10:4"></div>
+          <div style="font-size:8px;color:var(--text-muted);">10</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#39d353;border-radius:1px;height:30px" title="04-11:6"></div>
+          <div style="font-size:8px;color:var(--text-muted);">11</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#39d353;border-radius:1px;height:15px" title="04-12:3"></div>
+          <div style="font-size:8px;color:var(--text-muted);">12</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#e3b341;border-radius:1px;height:76px" title="04-13:15"></div>
+          <div style="font-size:8px;color:var(--text-muted);">13</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#e3b341;border-radius:1px;height:15px" title="04-14:3"></div>
+          <div style="font-size:8px;color:var(--text-muted);">14</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#e3b341;border-radius:1px;height:5px" title="04-15:1"></div>
+          <div style="font-size:8px;color:var(--text-muted);">15</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#e3b341;border-radius:1px;height:5px" title="04-16:1"></div>
+          <div style="font-size:8px;color:var(--text-muted);">16</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#e3b341;border-radius:1px;height:20px" title="04-17:4"></div>
+          <div style="font-size:8px;color:var(--text-muted);">17</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#e3b341;border-radius:1px;height:5px" title="04-18:1"></div>
+          <div style="font-size:8px;color:var(--text-muted);">18</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#e3b341;border-radius:1px;height:5px" title="04-19:1"></div>
+          <div style="font-size:8px;color:var(--text-muted);">19</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#30363d;border-radius:1px;height:10px" title="04-20:2"></div>
+          <div style="font-size:8px;color:var(--text-muted);">20</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#30363d;border-radius:1px;height:10px" title="04-21:2"></div>
+          <div style="font-size:8px;color:var(--text-muted);">21</div>
+        </div>
+        
+        <div style="flex:1;display:flex;flex-direction:column;gap:1px;align-items:center;">
+          <div style="width:10px;background:#30363d;border-radius:1px;height:5px" title="04-22:1"></div>
+          <div style="font-size:8px;color:var(--text-muted);">22</div>
+        </div>
+        
+      </div>
+      <div style="font-size:10px;color:var(--text-muted);display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;">
+        
+        <span style="display:flex;align-items:center;gap:4px;">
+          <span style="width:8px;height:8px;background:#30363d;border-radius:1px;display:inline-block;"></span>第1周(03-15-03-25)
+        </span>
+        
+        <span style="display:flex;align-items:center;gap:4px;">
+          <span style="width:8px;height:8px;background:#388bfd;border-radius:1px;display:inline-block;"></span>第2周(03-29-04-05)
+        </span>
+        
+        <span style="display:flex;align-items:center;gap:4px;">
+          <span style="width:8px;height:8px;background:#39d353;border-radius:1px;display:inline-block;"></span>第3周(04-06-04-12)
+        </span>
+        
+        <span style="display:flex;align-items:center;gap:4px;">
+          <span style="width:8px;height:8px;background:#e3b341;border-radius:1px;display:inline-block;"></span>第4周(04-13-04-19)
+        </span>
+        
+      </div>
+      
+      
+      
+      
+      <div class="week-stats">
+        <span class="week-stat up">任务总量：<strong>11→22→27→26</strong></span>
+        <span class="week-stat up">文章发布：<strong>0→17→20→7</strong></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CALENDAR HEATMAP -->
+  <div class="calendar-section">
+    <div class="section-label">贡献热力图 · 点击日期查看详情</div>
+    <div class="calendar-wrapper">
+      <div class="month-labels" id="monthLabels"></div>
+      <div class="calendar-body">
+        <div class="day-labels">
+          <div class="day-label">一</div>
+          <div class="day-label">三</div>
+          <div class="day-label">五</div>
+          <div class="day-label">日</div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+      <div class="calendar-legend">
+        <span>少</span>
+        <div class="legend-cell" style="background:var(--green-0)"></div>
+        <div class="legend-cell" style="background:var(--green-1)"></div>
+        <div class="legend-cell" style="background:var(--green-2)"></div>
+        <div class="legend-cell" style="background:var(--green-3)"></div>
+        <div class="legend-cell" style="background:var(--green-4)"></div>
+        <span>多</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALL TASKS -->
+  <div class="all-tasks-section">
+    <div class="section-header">
+      <h2>全部任务</h2>
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all" onclick="filterTasks('all', this)">全部</button>
+        
+        <button class="filter-tab" data-filter="article" onclick="filterTasks('article', this)" title="">文章 <span class="task-count">46</span></button>
+        
+        <button class="filter-tab" data-filter="system" onclick="filterTasks('system', this)" title="">系统 <span class="task-count">24</span></button>
+        
+        <button class="filter-tab" data-filter="research" onclick="filterTasks('research', this)" title="">研究 <span class="task-count">8</span></button>
+        
+        <button class="filter-tab" data-filter="skill" onclick="filterTasks('skill', this)" title="">Skill <span class="task-count">7</span></button>
+        
+        <button class="filter-tab" data-filter="course" onclick="filterTasks('course', this)" title="">课程 <span class="task-count">7</span></button>
+        
+        <button class="filter-tab" data-filter="image" onclick="filterTasks('image', this)" title="">配图 <span class="task-count">5</span></button>
+        
+        <button class="filter-tab" data-filter="learning" onclick="filterTasks('learning', this)" title="">learning <span class="task-count">1</span></button>
+        
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text-muted);padding:8px 20px;background:var(--card-hover);border-bottom:1px solid var(--border)">
+      <span style="color:var(--green-4)">●</span> 文章 <span style="color:var(--blue);margin-left:8px">●</span> 研究 <span style="color:var(--purple);margin-left:8px">●</span> Skill <span style="color:var(--yellow);margin-left:8px">●</span> 课程 <span style="color:var(--orange);margin-left:8px">●</span> 系统
+    </div>
+    <div class="tasks-list" id="tasksList">
+      
+      <div class="task-item" data-type="skill" title="即梦AI绘画提示词 Skill 创建">
+        <span class="task-date">03-15</span>
+        <span class="task-badge badge-skill">skill</span>
+        <span class="task-title">即梦AI绘画提示词 Skill 创建</span>
+      </div>
+      
+      <div class="task-item" data-type="research" title="豆包语义验证码调研">
+        <span class="task-date">03-15</span>
+        <span class="task-badge badge-research">research</span>
+        <span class="task-title">豆包语义验证码调研</span>
+      </div>
+      
+      <div class="task-item" data-type="course" title="100课课程进度更新">
+        <span class="task-date">03-17</span>
+        <span class="task-badge badge-course">course</span>
+        <span class="task-title">100课课程进度更新</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="课程字数规范确立">
+        <span class="task-date">03-17</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">课程字数规范确立</span>
+      </div>
+      
+      <div class="task-item" data-type="course" title="007课「能耐寻求定理」重写">
+        <span class="task-date">03-19</span>
+        <span class="task-badge badge-course">course</span>
+        <span class="task-title">007课「能耐寻求定理」重写</span>
+      </div>
+      
+      <div class="task-item" data-type="course" title="008课「供给侧心态」调研+生成">
+        <span class="task-date">03-19</span>
+        <span class="task-badge badge-course">course</span>
+        <span class="task-title">008课「供给侧心态」调研+生成</span>
+      </div>
+      
+      <div class="task-item" data-type="course" title="009课「复利」调研+生成">
+        <span class="task-date">03-19</span>
+        <span class="task-badge badge-course">course</span>
+        <span class="task-title">009课「复利」调研+生成</span>
+      </div>
+      
+      <div class="task-item" data-type="course" title="004课「约束」重写">
+        <span class="task-date">03-19</span>
+        <span class="task-badge badge-course">course</span>
+        <span class="task-title">004课「约束」重写</span>
+      </div>
+      
+      <div class="task-item" data-type="course" title="008课「供给侧心态」重写v3">
+        <span class="task-date">03-23</span>
+        <span class="task-badge badge-course">course</span>
+        <span class="task-title">008课「供给侧心态」重写v3</span>
+      </div>
+      
+      <div class="task-item" data-type="course" title="007课「权力的数学」整合版">
+        <span class="task-date">03-25</span>
+        <span class="task-badge badge-course">course</span>
+        <span class="task-title">007课「权力的数学」整合版</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="OpenClaw 交接文档完成">
+        <span class="task-date">03-25</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">OpenClaw 交接文档完成</span>
+      </div>
+      
+      <div class="task-item" data-type="skill" title="即梦CLI集成项目完成">
+        <span class="task-date">03-26</span>
+        <span class="task-badge badge-skill">skill</span>
+        <span class="task-title">即梦CLI集成项目完成</span>
+      </div>
+      
+      <div class="task-item" data-type="image" title="即梦生成：露营野趣集+愚人节海报">
+        <span class="task-date">03-26</span>
+        <span class="task-badge badge-image">image</span>
+        <span class="task-title">即梦生成：露营野趣集+愚人节海报</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="Gateway 重启加载新Skills">
+        <span class="task-date">03-27</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">Gateway 重启加载新Skills</span>
+      </div>
+      
+      <div class="task-item" data-type="research" title="小红书热点分析（科普选题）">
+        <span class="task-date">03-28</span>
+        <span class="task-badge badge-research">research</span>
+        <span class="task-title">小红书热点分析（科普选题）</span>
+      </div>
+      
+      <div class="task-item" data-type="learning" title="英语学习：虚拟语气+倒装句">
+        <span class="task-date">03-28</span>
+        <span class="task-badge badge-learning">learning</span>
+        <span class="task-title">英语学习：虚拟语气+倒装句</span>
+      </div>
+      
+      <div class="task-item" data-type="skill" title="批量安装9个Skills+Skills全景图网页">
+        <span class="task-date">03-29</span>
+        <span class="task-badge badge-skill">skill</span>
+        <span class="task-title">批量安装9个Skills+Skills全景图网页</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="017课「安全感」公众号版">
+        <span class="task-date">03-29</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">017课「安全感」公众号版</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="018课「赛道选择」公众号版v2">
+        <span class="task-date">03-29</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">018课「赛道选择」公众号版v2</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="即梦AI指南文章（万维钢风格）">
+        <span class="task-date">03-29</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">即梦AI指南文章（万维钢风格）</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="Tavily API 双Key切换配置">
+        <span class="task-date">03-30</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">Tavily API 双Key切换配置</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="小红书AI热点分析">
+        <span class="task-date">03-31</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">小红书AI热点分析</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="情绪价值课程加餐">
+        <span class="task-date">03-31</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">情绪价值课程加餐</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="Color Walk课程加餐">
+        <span class="task-date">03-31</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">Color Walk课程加餐</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="018课「赛道选择」v4版">
+        <span class="task-date">04-01</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">018课「赛道选择」v4版</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="019课「供给侧心态」">
+        <span class="task-date">04-01</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">019课「供给侧心态」</span>
+      </div>
+      
+      <div class="task-item" data-type="research" title="X.com热点分析">
+        <span class="task-date">04-02</span>
+        <span class="task-badge badge-research">research</span>
+        <span class="task-title">X.com热点分析</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="Jonathan Haidt社交媒体研究v2">
+        <span class="task-date">04-02</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">Jonathan Haidt社交媒体研究v2</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="2026技术趋势调研+公众号文">
+        <span class="task-date">04-03</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">2026技术趋势调研+公众号文</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="023课「概率分布：决策的本质」">
+        <span class="task-date">04-03</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">023课「概率分布：决策的本质」</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="Harness Engineering主流程集成">
+        <span class="task-date">04-04</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">Harness Engineering主流程集成</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="推荐组合优化+HARNESS使用手册">
+        <span class="task-date">04-04</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">推荐组合优化+HARNESS使用手册</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="z-agency 文章写作">
+        <span class="task-date">03-29</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">z-agency 文章写作</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="为什么年轻人开始把AI当朋友？">
+        <span class="task-date">03-30</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">为什么年轻人开始把AI当朋友？</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="AI正在杀死普通职场人">
+        <span class="task-date">03-30</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">AI正在杀死普通职场人</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="Z世代主体性觉醒">
+        <span class="task-date">03-31</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">Z世代主体性觉醒</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="AI公司把自己的秘密泄露了">
+        <span class="task-date">04-02</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">AI公司把自己的秘密泄露了</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="2026年十大技术趋势">
+        <span class="task-date">04-02</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">2026年十大技术趋势</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="文化消费的平民化">
+        <span class="task-date">04-03</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">文化消费的平民化</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="被忽视的追赶者：千问552%增长">
+        <span class="task-date">04-03</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">被忽视的追赶者：千问552%增长</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="Claude订阅陷阱：为什么付了钱却不能用？">
+        <span class="task-date">04-06</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">Claude订阅陷阱：为什么付了钱却不能用？</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="20美元薅羊毛被封禁">
+        <span class="task-date">04-06</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">20美元薅羊毛被封禁</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="1220亿美元！OpenAI刷新人类融资纪录">
+        <span class="task-date">04-07</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">1220亿美元！OpenAI刷新人类融资纪录</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="Claude订阅陷阱（wechat版）">
+        <span class="task-date">04-07</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">Claude订阅陷阱（wechat版）</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="纽约客万字长文：Sam Altman的谎言与野心">
+        <span class="task-date">04-07</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">纽约客万字长文：Sam Altman的谎言与野心</span>
+      </div>
+      
+      <div class="task-item" data-type="image" title="即梦配图：积分节省指南 + 7天冥想">
+        <span class="task-date">04-07</span>
+        <span class="task-badge badge-image">image</span>
+        <span class="task-title">即梦配图：积分节省指南 + 7天冥想</span>
+      </div>
+      
+      <div class="task-item" data-type="image" title="即梦配图：南极绕极流 + 开源AI超越闭源">
+        <span class="task-date">04-08</span>
+        <span class="task-badge badge-image">image</span>
+        <span class="task-title">即梦配图：南极绕极流 + 开源AI超越闭源</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="GLM5.1与DeepSeek开源AI重塑之战">
+        <span class="task-date">04-08</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">GLM5.1与DeepSeek开源AI重塑之战</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="AI自习室县城真相">
+        <span class="task-date">04-09</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">AI自习室县城真相</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="知识图谱革命">
+        <span class="task-date">04-09</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">知识图谱革命</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="AI数据供应链危机">
+        <span class="task-date">04-09</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">AI数据供应链危机</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="Happy Horse 1.0登顶AI视频榜">
+        <span class="task-date">04-09</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">Happy Horse 1.0登顶AI视频榜</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="摩根士丹利的AI突破预警">
+        <span class="task-date">04-09</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">摩根士丹利的AI突破预警</span>
+      </div>
+      
+      <div class="task-item" data-type="image" title="即梦配图4套（AI自习室/知识图谱/Mercor/HappyHorse）">
+        <span class="task-date">04-09</span>
+        <span class="task-badge badge-image">image</span>
+        <span class="task-title">即梦配图4套（AI自习室/知识图谱/Mercor/HappyHorse）</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="他把写作风格的秘密开源了">
+        <span class="task-date">04-10</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">他把写作风格的秘密开源了</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="为什么1+1+1=100？香料组合抗炎重写">
+        <span class="task-date">04-10</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">为什么1+1+1=100？香料组合抗炎重写</span>
+      </div>
+      
+      <div class="task-item" data-type="image" title="即梦配图：AI短剧 + 开源AI">
+        <span class="task-date">04-10</span>
+        <span class="task-badge badge-image">image</span>
+        <span class="task-title">即梦配图：AI短剧 + 开源AI</span>
+      </div>
+      
+      <div class="task-item" data-type="skill" title="万维钢skill全面升级">
+        <span class="task-date">04-10</span>
+        <span class="task-badge badge-skill">skill</span>
+        <span class="task-title">万维钢skill全面升级</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="当你的创业成功时，你的市场已经消失了">
+        <span class="task-date">04-11</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">当你的创业成功时，你的市场已经消失了</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="你以为AI在帮你，其实它在拉大差距（万维钢版）">
+        <span class="task-date">04-11</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">你以为AI在帮你，其实它在拉大差距（万维钢版）</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="MBTI已死，SBTI当道">
+        <span class="task-date">04-11</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">MBTI已死，SBTI当道</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="AI假情感博主：算法正在批量生产爱情方法论">
+        <span class="task-date">04-11</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">AI假情感博主：算法正在批量生产爱情方法论</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="你的工资，被AI卷死了吗？（卡兹克版）">
+        <span class="task-date">04-11</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">你的工资，被AI卷死了吗？（卡兹克版）</span>
+      </div>
+      
+      <div class="task-item" data-type="research" title="SBTI恶搞测试爆火调研">
+        <span class="task-date">04-11</span>
+        <span class="task-badge badge-research">research</span>
+        <span class="task-title">SBTI恶搞测试爆火调研</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="AI假情感博主：算法时代的亲密关系工业化">
+        <span class="task-date">04-12</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">AI假情感博主：算法时代的亲密关系工业化</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="GitHub热门项目日报 2026-04-12">
+        <span class="task-date">04-12</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">GitHub热门项目日报 2026-04-12</span>
+      </div>
+      
+      <div class="task-item" data-type="research" title="wechat-cli 开源项目调研">
+        <span class="task-date">04-12</span>
+        <span class="task-badge badge-research">research</span>
+        <span class="task-title">wechat-cli 开源项目调研</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="WorkBuddy清理：75个目录全部清空">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">WorkBuddy清理：75个目录全部清空</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="记忆同步协议确立 + 历史补录">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">记忆同步协议确立 + 历史补录</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="文章文件唯一存储协议确立">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">文章文件唯一存储协议确立</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="WorkBuddy行为分析报告生成">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">WorkBuddy行为分析报告生成</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="阿尔忒弥斯II：53年后，人类再次站上深空的门槛">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">阿尔忒弥斯II：53年后，人类再次站上深空的门槛</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="MBTI已死，SBTI当道（SBTI HTML版）">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">MBTI已死，SBTI当道（SBTI HTML版）</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="今天，我决定把AI创作这件事说清楚（更新版）">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">今天，我决定把AI创作这件事说清楚（更新版）</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="工作日志仪表盘 v3 上线 + Skill 打包">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">工作日志仪表盘 v3 上线 + Skill 打包</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="选题关联图模块上线（11个节点，13条边）">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">选题关联图模块上线（11个节点，13条边）</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="公众号数据模块上线（渠道占比、分享收藏趋势）">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">公众号数据模块上线（渠道占比、分享收藏趋势）</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="远·数据洞察 + AI洞察手写模式">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">远·数据洞察 + AI洞察手写模式</span>
+      </div>
+      
+      <div class="task-item" data-type="skill" title="workbuddy-dashboard Skill 更新至 v3.7">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-skill">skill</span>
+        <span class="task-title">workbuddy-dashboard Skill 更新至 v3.7</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="女娲Skill数字分身：假如人人都能被蒸馏成AI分身">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">女娲Skill数字分身：假如人人都能被蒸馏成AI分身</span>
+      </div>
+      
+      <div class="task-item" data-type="skill" title="hv-analysis Skill 安装（横纵分析法深度研究）">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-skill">skill</span>
+        <span class="task-title">hv-analysis Skill 安装（横纵分析法深度研究）</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="记忆系统对比报告生成">
+        <span class="task-date">04-13</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">记忆系统对比报告生成</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="公众号账号诊断：综合评分58/100">
+        <span class="task-date">04-14</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">公众号账号诊断：综合评分58/100</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="女娲Skill文章评审 + 开头修改（区分同事Skill与女娲Skill）">
+        <span class="task-date">04-14</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">女娲Skill文章评审 + 开头修改（区分同事Skill与女娲Skill）</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="记忆系统对比报告部署至GitHub Pages">
+        <span class="task-date">04-14</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">记忆系统对比报告部署至GitHub Pages</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="仪表盘全量同步04-15数据">
+        <span class="task-date">04-15</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">仪表盘全量同步04-15数据</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="仪表盘JS修复+全量同步04-16数据">
+        <span class="task-date">04-16</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">仪表盘JS修复+全量同步04-16数据</span>
+      </div>
+      
+      <div class="task-item" data-type="article" title="马斯克诉OpenAI：一场关于AGI的世纪诉讼">
+        <span class="task-date">04-17</span>
+        <span class="task-badge badge-article">article</span>
+        <span class="task-title">马斯克诉OpenAI：一场关于AGI的世纪诉讼</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="公众号诊断·订阅钩子文案模板·选题过滤手册">
+        <span class="task-date">04-17</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">公众号诊断·订阅钩子文案模板·选题过滤手册</span>
+      </div>
+      
+      <div class="task-item" data-type="research" title="下午+晚场选题评估（Being-H0.7/OpenAI诉讼/僵尸细胞）">
+        <span class="task-date">04-17</span>
+        <span class="task-badge badge-research">research</span>
+        <span class="task-title">下午+晚场选题评估（Being-H0.7/OpenAI诉讼/僵尸细胞）</span>
+      </div>
+      
+      <div class="task-item" data-type="skill" title="wechat-article-writer Skill更新（选题过滤+订阅钩子）">
+        <span class="task-date">04-17</span>
+        <span class="task-badge badge-skill">skill</span>
+        <span class="task-title">wechat-article-writer Skill更新（选题过滤+订阅钩子）</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="仪表盘日度更新">
+        <span class="task-date">04-18</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">仪表盘日度更新</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="仪表盘日度更新">
+        <span class="task-date">04-19</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">仪表盘日度更新</span>
+      </div>
+      
+      <div class="task-item" data-type="research" title="AI大厂动态采集·DeepSeek V4预期升温">
+        <span class="task-date">04-20</span>
+        <span class="task-badge badge-research">research</span>
+        <span class="task-title">AI大厂动态采集·DeepSeek V4预期升温</span>
+      </div>
+      
+      <div class="task-item" data-type="research" title="机器人「闪电」半马纪录·Cerebras IPO·Meta裁员">
+        <span class="task-date">04-20</span>
+        <span class="task-badge badge-research">research</span>
+        <span class="task-title">机器人「闪电」半马纪录·Cerebras IPO·Meta裁员</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="仪表盘全量同步04-21数据（含新文章）">
+        <span class="task-date">04-21</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">仪表盘全量同步04-21数据（含新文章）</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="文章自检自动化流程设置（wechat-mentor）">
+        <span class="task-date">04-21</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">文章自检自动化流程设置（wechat-mentor）</span>
+      </div>
+      
+      <div class="task-item" data-type="system" title="仪表盘日志模块更新·手写新洞察">
+        <span class="task-date">04-22</span>
+        <span class="task-badge badge-system">system</span>
+        <span class="task-title">仪表盘日志模块更新·手写新洞察</span>
+      </div>
+      
+      
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Calendar heatmap rendering
+(function() {
+  const heatmapData = {"01-01": {"count": 0, "level": 0}, "01-02": {"count": 0, "level": 0}, "01-03": {"count": 0, "level": 0}, "01-04": {"count": 0, "level": 0}, "01-05": {"count": 0, "level": 0}, "01-06": {"count": 0, "level": 0}, "01-07": {"count": 0, "level": 0}, "01-08": {"count": 0, "level": 0}, "01-09": {"count": 0, "level": 0}, "01-10": {"count": 0, "level": 0}, "01-11": {"count": 0, "level": 0}, "01-12": {"count": 0, "level": 0}, "01-13": {"count": 0, "level": 0}, "01-14": {"count": 0, "level": 0}, "01-15": {"count": 0, "level": 0}, "01-16": {"count": 0, "level": 0}, "01-17": {"count": 0, "level": 0}, "01-18": {"count": 0, "level": 0}, "01-19": {"count": 0, "level": 0}, "01-20": {"count": 0, "level": 0}, "01-21": {"count": 0, "level": 0}, "01-22": {"count": 0, "level": 0}, "01-23": {"count": 0, "level": 0}, "01-24": {"count": 0, "level": 0}, "01-25": {"count": 0, "level": 0}, "01-26": {"count": 0, "level": 0}, "01-27": {"count": 0, "level": 0}, "01-28": {"count": 0, "level": 0}, "01-29": {"count": 0, "level": 0}, "01-30": {"count": 0, "level": 0}, "01-31": {"count": 0, "level": 0}, "02-01": {"count": 0, "level": 0}, "02-02": {"count": 0, "level": 0}, "02-03": {"count": 0, "level": 0}, "02-04": {"count": 0, "level": 0}, "02-05": {"count": 0, "level": 0}, "02-06": {"count": 0, "level": 0}, "02-07": {"count": 0, "level": 0}, "02-08": {"count": 0, "level": 0}, "02-09": {"count": 0, "level": 0}, "02-10": {"count": 0, "level": 0}, "02-11": {"count": 0, "level": 0}, "02-12": {"count": 0, "level": 0}, "02-13": {"count": 0, "level": 0}, "02-14": {"count": 0, "level": 0}, "02-15": {"count": 0, "level": 0}, "02-16": {"count": 0, "level": 0}, "02-17": {"count": 0, "level": 0}, "02-18": {"count": 0, "level": 0}, "02-19": {"count": 0, "level": 0}, "02-20": {"count": 0, "level": 0}, "02-21": {"count": 0, "level": 0}, "02-22": {"count": 0, "level": 0}, "02-23": {"count": 0, "level": 0}, "02-24": {"count": 0, "level": 0}, "02-25": {"count": 0, "level": 0}, "02-26": {"count": 0, "level": 0}, "02-27": {"count": 0, "level": 0}, "02-28": {"count": 0, "level": 0}, "03-01": {"count": 0, "level": 0}, "03-02": {"count": 0, "level": 0}, "03-03": {"count": 0, "level": 0}, "03-04": {"count": 0, "level": 0}, "03-05": {"count": 0, "level": 0}, "03-06": {"count": 0, "level": 0}, "03-07": {"count": 0, "level": 0}, "03-08": {"count": 0, "level": 0}, "03-09": {"count": 0, "level": 0}, "03-10": {"count": 0, "level": 0}, "03-11": {"count": 0, "level": 0}, "03-12": {"count": 0, "level": 0}, "03-13": {"count": 0, "level": 0}, "03-14": {"count": 0, "level": 0}, "03-15": {"count": 2, "level": 1}, "03-16": {"count": 0, "level": 0}, "03-17": {"count": 2, "level": 1}, "03-18": {"count": 0, "level": 0}, "03-19": {"count": 4, "level": 2}, "03-20": {"count": 0, "level": 0}, "03-21": {"count": 0, "level": 0}, "03-22": {"count": 0, "level": 0}, "03-23": {"count": 1, "level": 1}, "03-24": {"count": 0, "level": 0}, "03-25": {"count": 2, "level": 1}, "03-26": {"count": 2, "level": 1}, "03-27": {"count": 1, "level": 1}, "03-28": {"count": 2, "level": 1}, "03-29": {"count": 5, "level": 2}, "03-30": {"count": 3, "level": 2}, "03-31": {"count": 4, "level": 2}, "04-01": {"count": 2, "level": 1}, "04-02": {"count": 4, "level": 2}, "04-03": {"count": 4, "level": 2}, "04-04": {"count": 2, "level": 1}, "04-05": {"count": 0, "level": 0}, "04-06": {"count": 2, "level": 1}, "04-07": {"count": 4, "level": 2}, "04-08": {"count": 2, "level": 1}, "04-09": {"count": 6, "level": 3}, "04-10": {"count": 4, "level": 2}, "04-11": {"count": 6, "level": 3}, "04-12": {"count": 3, "level": 2}, "04-13": {"count": 15, "level": 4}, "04-14": {"count": 3, "level": 2}, "04-15": {"count": 1, "level": 1}, "04-16": {"count": 1, "level": 1}, "04-17": {"count": 4, "level": 2}, "04-18": {"count": 1, "level": 1}, "04-19": {"count": 1, "level": 1}, "04-20": {"count": 2, "level": 1}, "04-21": {"count": 2, "level": 1}, "04-22": {"count": 1, "level": 1}, "04-23": {"count": 0, "level": 0}};
+  const today = '2026-04-23'.split('-').slice(1).join('-');
+
+  const grid = document.getElementById('calendarGrid');
+  if (!grid) return;
+
+  // Generate calendar cells for the past 4 months
+  const now = new Date();
+  const start = new Date(now);
+  start.setDate(start.getDate() - 120); // ~4 months
+
+  let html = '';
+  const dayOfWeek = start.getDay() || 7;
+  for (let i = 1; i < dayOfWeek; i++) {
+    html += '<div class="day-cell empty"></div>';
+  }
+
+  const current = new Date(start);
+  while (current <= now) {
+    const month = current.getMonth() + 1;
+    const day = current.getDate();
+    const dateKey = String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+    const fullDate = `${current.getFullYear()}-${dateKey}`;
+
+    const data = heatmapData[dateKey] || { level: 0, count: 0 };
+    const isToday = dateKey === today ? 'today' : '';
+
+    html += `<div class="day-cell ${isToday}" data-level="${data.level}" data-date="${fullDate}">
+      <span class="tooltip">${fullDate}: ${data.count}个任务</span>
+    </div>`;
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  grid.innerHTML = html;
+})();
+
+// Task filter
+function filterTasks(type, btn) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.querySelectorAll('.task-item').forEach(item => {
+    if (type === 'all' || item.dataset.type === type) {
+      item.style.display = 'flex';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+</script>
+</body>
+</html>
